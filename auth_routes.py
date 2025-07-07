@@ -20,6 +20,7 @@ def sign_up():
     db.session.commit()
     return jsonify({'message': 'Signup success'}), 200
 
+
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -27,7 +28,15 @@ def login():
     password = data.get('password')
 
     user = User.query.filter_by(email=email).first()
+
     if user and bcrypt.check_password_hash(user.password, password):
         token = create_access_token(identity={'id': user.id, 'email': user.email})
-        return jsonify({'token': token, 'user': {'id': user.id, 'username': user.username}})
+        return jsonify({
+            'token': token,
+            'user': {
+                'id': user.id,
+                'username': user.username
+            }
+        })
+
     return jsonify({'message': 'Invalid credentials'}), 401
