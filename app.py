@@ -20,7 +20,7 @@ with app.app_context():
 
 # Register blueprints
 app.register_blueprint(auth_bp, url_prefix='/api')
-app.register_blueprint(table_bp, url_prefix='/api')  # ✅ เพิ่มตรงนี้
+app.register_blueprint(table_bp, url_prefix='/api')  # ✅ ครบถ้วน
 
 # Root route for testing
 @app.route('/')
@@ -30,4 +30,3 @@ def index():
 # Run the app (only in development)
 if __name__ == '__main__':
     app.run(debug=True)
-

@@ -18,6 +18,7 @@ def join_table(table_id):
     db.session.commit()
     return jsonify({'message': f'Joined table {table_id} successfully'}), 200
 
+
 @table_bp.route('/leave_table/<int:table_id>', methods=["POST"])
 @jwt_required()
 def leave_table(table_id):
@@ -31,6 +32,7 @@ def leave_table(table_id):
     user.tables.remove(table)
     db.session.commit()
     return jsonify({'message': f'Left table {table_id} successfully'}), 200
+
 
 @table_bp.route('/table/<int:table_id>/members', methods=["GET"])
 @jwt_required()

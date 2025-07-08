@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: boardgame-backend
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: boardgame-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        value: super-secret-jwt-key
+databases:
+  - name: boardgame-db
