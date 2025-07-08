@@ -33,7 +33,7 @@ def login():
     user = User.query.filter_by(email=email).first()
 
     if user and bcrypt.check_password_hash(user.password, password):
-        token = create_access_token(identity=user.id)  # ✅ สำคัญ: ต้องเป็น int หรือ str เท่านั้น
+        token = create_access_token(identity=str(user.id))  # 🔒 ใช้ str(user.id) เพื่อไม่ให้ JWT error
         return jsonify({
             'token': token,
             'user': {
