@@ -10,7 +10,11 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # ✅ Setup extensions
-CORS(app, origins=["https://boardgame-app-inky.vercel.app"], supports_credentials=True)
+CORS(app,
+     origins=["https://boardgame-app-inky.vercel.app"],  # หรือใช้ wildcard "*" ชั่วคราว
+     supports_credentials=True,
+     allow_headers=["Authorization", "Content-Type"]
+)
 JWTManager(app)
 db.init_app(app)
 
@@ -20,7 +24,7 @@ with app.app_context():
 
 # ✅ Register blueprints
 app.register_blueprint(auth_bp, url_prefix='/api')
-app.register_blueprint(table_bp, url_prefix='/api')  # ✅ ครบถ้วน
+app.register_blueprint(table_bp, url_prefix='/api')
 
 # ✅ Root route for testing
 @app.route('/')
