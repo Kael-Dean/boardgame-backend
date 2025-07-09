@@ -11,8 +11,8 @@ def join_table(table_id):
     user = User.query.get_or_404(user_id)
     table = Table.query.get_or_404(table_id)
 
-    if user.tables:
-        return jsonify({'error': 'User already in a table'}), 403
+    if table in user.tables:
+        return jsonify({'error': 'User already joined this table'}), 403
 
     user.tables.append(table)
     db.session.commit()
