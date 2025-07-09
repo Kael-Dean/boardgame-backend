@@ -5,7 +5,7 @@ from config import Config
 from models import db
 from auth_routes import auth_bp
 from table_routes import table_bp  # ✅ เพิ่มตรงนี้
-from flask_migrate import Migrate
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -16,7 +16,7 @@ CORS(app, resources={r"/api/*": {"origins": "https://boardgame-app-inky.vercel.a
 # ✅ Extensions
 JWTManager(app)
 db.init_app(app)
-migrate = Migrate(app, db)
+
 
 # ✅ Create tables (เฉพาะตอน local, ถ้า render จะไม่ใช้ตรงนี้)
 with app.app_context():
