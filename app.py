@@ -4,25 +4,27 @@ from flask_jwt_extended import JWTManager
 from config import Config
 from models import db
 from auth_routes import auth_bp
-from table_routes import table_bp
+from table_routes import table_bp  # ✅ เพิ่มตรงนี้
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# ✅ ตั้งค่า CORS ให้ถูกต้อง
+# ✅ CORS
 CORS(app, resources={r"/api/*": {"origins": "https://boardgame-app-inky.vercel.app"}}, supports_credentials=True)
 
-# Setup extensions
+# ✅ Extensions
 JWTManager(app)
 db.init_app(app)
+migrate = Migrate(app, db)
 
-# Create tables
+# ✅ Create tables (เฉพาะตอน local, ถ้า render จะไม่ใช้ตรงนี้)
 with app.app_context():
     db.create_all()
 
-# Register blueprints
+# ✅ Blueprints
 app.register_blueprint(auth_bp, url_prefix='/api')
-app.register_blueprint(table_bp, url_prefix='/api')
+app.register_blueprint(table_bp, url_prefix='/api')  # ✅ เพิ่มตรงนี้
 
 @app.route('/')
 def index():
