@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, User, GameTable  # ✅ ใช้ชื่อใหม่
+from models import db, User, GameTable
 
 table_bp = Blueprint('table', __name__)
 
-# GET /api/tables
+# ✅ GET /api/tables
 @table_bp.route('/tables', methods=['GET'])
 @jwt_required()
 def get_tables():
@@ -22,7 +22,7 @@ def get_tables():
     return jsonify({'tables': data})
 
 
-# POST /api/join_table/<table_id>
+# ✅ POST /api/join_table/<table_id>
 @table_bp.route('/join_table/<int:table_id>', methods=['POST'])
 @jwt_required()
 def join_table(table_id):
@@ -30,13 +30,14 @@ def join_table(table_id):
     user = User.query.get(user_id)
     table = GameTable.query.get(table_id)
 
-    if not table:
-        return jsonify({'error': 'โต๊ะไม่พบ'}), 404
+    if not user or not table:
+        return jsonify({'error': 'ไม่พบ user หรือโต๊ะ'}), 404
 
-    # ลบ user ออกจากทุกโต๊ะก่อน (เข้าได้แค่ 1 โต๊ะ)
+    # ลบ user ออกจากทุกโต๊ะก่อน
     for t in GameTable.query.all():
         if user in t.users:
             t.users.remove(user)
+    db.session.commit()  # ✅ commit การลบ
 
     if len(table.users) >= table.max_players:
         return jsonify({'error': 'โต๊ะเต็มแล้ว'}), 400
@@ -46,7 +47,7 @@ def join_table(table_id):
     return jsonify({'message': 'เข้าร่วมโต๊ะสำเร็จ'})
 
 
-# POST /api/leave_table/<table_id>
+# ✅ POST /api/leave_table/<table_id>
 @table_bp.route('/leave_table/<int:table_id>', methods=['POST'])
 @jwt_required()
 def leave_table(table_id):
@@ -54,7 +55,7 @@ def leave_table(table_id):
     user = User.query.get(user_id)
     table = GameTable.query.get(table_id)
 
-    if not table or user not in table.users:
+    if not user or not table or user not in table.users:
         return jsonify({'error': 'คุณไม่ได้อยู่ในโต๊ะนี้'}), 400
 
     table.users.remove(user)
@@ -62,7 +63,7 @@ def leave_table(table_id):
     return jsonify({'message': 'ออกจากโต๊ะแล้ว'})
 
 
-# GET /api/table/<table_id>/members
+# ✅ GET /api/table/<table_id>/members
 @table_bp.route('/table/<int:table_id>/members', methods=['GET'])
 @jwt_required()
 def get_table_members(table_id):
@@ -73,5 +74,6 @@ def get_table_members(table_id):
     members = [{'id': u.id, 'username': u.username} for u in table.users]
     return jsonify(members)
 
-# 👇 บรรทัดสุดท้าย
+
+# 👇 ✅ export เพื่อให้ import จาก app.py ได้
 __all__ = ['table_bp']

@@ -9,22 +9,22 @@ from table_routes import table_bp
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# ✅ CORS (แก้ตรงนี้ให้ครอบคลุม)
-CORS(app,
-     resources={r"/api/*": {"origins": ["https://boardgame-app-inky.vercel.app"]}},
-     supports_credentials=True,
-     methods=["GET", "POST", "OPTIONS"],
-     allow_headers=["Content-Type", "Authorization"])
+# ✅ CORS ปรับให้ครบ headers และ methods
+CORS(app, resources={r"/api/*": {
+    "origins": ["https://boardgame-app-inky.vercel.app"],
+    "methods": ["GET", "POST", "OPTIONS"],
+    "allow_headers": ["Content-Type", "Authorization"]
+}}, supports_credentials=True)
 
-# ✅ JWT และ DB
+# ✅ JWT & DB
 JWTManager(app)
 db.init_app(app)
 
-# ✅ Create tables (เฉพาะตอน local เท่านั้น)
+# ✅ Create tables (เฉพาะ local)
 with app.app_context():
     db.create_all()
 
-# ✅ Blueprint
+# ✅ Blueprints
 app.register_blueprint(auth_bp, url_prefix='/api')
 app.register_blueprint(table_bp, url_prefix='/api')
 
