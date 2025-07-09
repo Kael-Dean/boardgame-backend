@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, User, Table
-
+from models import db, User, GameTable  # ✅ ใช้ชื่อใหม่
 
 table_bp = Blueprint('table', __name__)
 
@@ -9,13 +8,16 @@ table_bp = Blueprint('table', __name__)
 @table_bp.route('/tables', methods=['GET'])
 @jwt_required()
 def get_tables():
-    tables = Table.query.all()
+    tables = GameTable.query.all()
     data = []
     for table in tables:
         data.append({
             'id': table.id,
-            'status': table.status,
-            'members': [{'id': u.id, 'username': u.username} for u in table.members]
+            'name': table.name,
+            'max_players': table.max_players,
+            'current_players': len(table.users),
+            'is_full': len(table.users) >= table.max_players,
+            'members': [{'id': u.id, 'username': u.username} for u in table.users]
         })
     return jsonify({'tables': data})
 
@@ -26,20 +28,20 @@ def get_tables():
 def join_table(table_id):
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
-    table = Table.query.get(table_id)
+    table = GameTable.query.get(table_id)
 
     if not table:
         return jsonify({'error': 'โต๊ะไม่พบ'}), 404
 
-    # ลบ user จากทุกโต๊ะก่อน (เข้าได้แค่ 1 โต๊ะ)
-    for t in Table.query.all():
-        if user in t.members:
-            t.members.remove(user)
+    # ลบ user ออกจากทุกโต๊ะก่อน (เข้าได้แค่ 1 โต๊ะ)
+    for t in GameTable.query.all():
+        if user in t.users:
+            t.users.remove(user)
 
-    if len(table.members) >= table.max_players:
+    if len(table.users) >= table.max_players:
         return jsonify({'error': 'โต๊ะเต็มแล้ว'}), 400
 
-    table.members.append(user)
+    table.users.append(user)
     db.session.commit()
     return jsonify({'message': 'เข้าร่วมโต๊ะสำเร็จ'})
 
@@ -50,12 +52,12 @@ def join_table(table_id):
 def leave_table(table_id):
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
-    table = Table.query.get(table_id)
+    table = GameTable.query.get(table_id)
 
-    if not table or user not in table.members:
+    if not table or user not in table.users:
         return jsonify({'error': 'คุณไม่ได้อยู่ในโต๊ะนี้'}), 400
 
-    table.members.remove(user)
+    table.users.remove(user)
     db.session.commit()
     return jsonify({'message': 'ออกจากโต๊ะแล้ว'})
 
@@ -64,12 +66,12 @@ def leave_table(table_id):
 @table_bp.route('/table/<int:table_id>/members', methods=['GET'])
 @jwt_required()
 def get_table_members(table_id):
-    table = Table.query.get(table_id)
+    table = GameTable.query.get(table_id)
     if not table:
         return jsonify({'error': 'ไม่พบโต๊ะ'}), 404
 
-    members = [{'id': u.id, 'username': u.username} for u in table.members]
+    members = [{'id': u.id, 'username': u.username} for u in table.users]
     return jsonify(members)
 
-# 👇 เพิ่มบรรทัดนี้ท้ายสุด
+# 👇 บรรทัดสุดท้าย
 __all__ = ['table_bp']
