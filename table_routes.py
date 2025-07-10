@@ -8,6 +8,10 @@ table_bp = Blueprint('table', __name__)
 @table_bp.route('/tables', methods=['GET'])
 @jwt_required()
 def get_tables():
+    user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({'error': 'ไม่สามารถยืนยันตัวตนได้'}), 401
+
     tables = GameTable.query.all()
     data = []
     for table in tables:
@@ -27,17 +31,19 @@ def get_tables():
 @jwt_required()
 def join_table(table_id):
     user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({'error': 'ไม่สามารถยืนยันตัวตนได้'}), 401
+
     user = User.query.get(user_id)
     table = GameTable.query.get(table_id)
 
     if not user or not table:
         return jsonify({'error': 'ไม่พบ user หรือโต๊ะ'}), 404
 
-    # ลบ user ออกจากทุกโต๊ะก่อน
     for t in GameTable.query.all():
         if user in t.users:
             t.users.remove(user)
-    db.session.commit()  # ✅ commit การลบ
+    db.session.commit()
 
     if len(table.users) >= table.max_players:
         return jsonify({'error': 'โต๊ะเต็มแล้ว'}), 400
@@ -52,6 +58,9 @@ def join_table(table_id):
 @jwt_required()
 def leave_table(table_id):
     user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({'error': 'ไม่สามารถยืนยันตัวตนได้'}), 401
+
     user = User.query.get(user_id)
     table = GameTable.query.get(table_id)
 
@@ -67,6 +76,10 @@ def leave_table(table_id):
 @table_bp.route('/table/<int:table_id>/members', methods=['GET'])
 @jwt_required()
 def get_table_members(table_id):
+    user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({'error': 'ไม่สามารถยืนยันตัวตนได้'}), 401
+
     table = GameTable.query.get(table_id)
     if not table:
         return jsonify({'error': 'ไม่พบโต๊ะ'}), 404
@@ -75,5 +88,4 @@ def get_table_members(table_id):
     return jsonify(members)
 
 
-# 👇 ✅ export เพื่อให้ import จาก app.py ได้
 __all__ = ['table_bp']
