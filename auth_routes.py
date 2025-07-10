@@ -3,7 +3,7 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import create_access_token
 from models import db, User
 
-auth_bp = Blueprint('auth', __name__)
+auth_bp = Blueprint('auth', __name__)  # ✅ ต้องมาก่อนใช้ route
 bcrypt = Bcrypt()
 
 @auth_bp.route('/sign-up', methods=['POST'])
@@ -14,6 +14,7 @@ def sign_up():
     password = data.get('password')
     age = data.get('age')
 
+    # ตรวจซ้ำ
     if User.query.filter_by(email=email).first():
         return jsonify({'error': 'Email already exists'}), 409
 
@@ -23,6 +24,7 @@ def sign_up():
     db.session.commit()
 
     return jsonify({'message': 'Signup success'}), 200
+
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
