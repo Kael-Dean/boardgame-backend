@@ -4,10 +4,10 @@ from models import db, User, GameTable
 
 table_bp = Blueprint('table', __name__)
 
-# ✅ GET /api/tables
 @table_bp.route('/tables', methods=['GET'])
 @jwt_required()
 def get_tables():
+    user_id = get_jwt_identity()
     tables = GameTable.query.all()
     data = []
     for table in tables:
@@ -21,8 +21,6 @@ def get_tables():
         })
     return jsonify({'tables': data})
 
-
-# ✅ POST /api/join_table/<table_id>
 @table_bp.route('/join_table/<int:table_id>', methods=['POST'])
 @jwt_required()
 def join_table(table_id):
@@ -33,11 +31,11 @@ def join_table(table_id):
     if not user or not table:
         return jsonify({'error': 'ไม่พบ user หรือโต๊ะ'}), 404
 
-    # ลบ user ออกจากทุกโต๊ะก่อน
+    # ✅ ลบจากโต๊ะก่อนหน้า
     for t in GameTable.query.all():
         if user in t.users:
             t.users.remove(user)
-    db.session.commit()  # ✅ commit การลบ
+    db.session.commit()
 
     if len(table.users) >= table.max_players:
         return jsonify({'error': 'โต๊ะเต็มแล้ว'}), 400
@@ -46,8 +44,6 @@ def join_table(table_id):
     db.session.commit()
     return jsonify({'message': 'เข้าร่วมโต๊ะสำเร็จ'})
 
-
-# ✅ POST /api/leave_table/<table_id>
 @table_bp.route('/leave_table/<int:table_id>', methods=['POST'])
 @jwt_required()
 def leave_table(table_id):
@@ -62,8 +58,6 @@ def leave_table(table_id):
     db.session.commit()
     return jsonify({'message': 'ออกจากโต๊ะแล้ว'})
 
-
-# ✅ GET /api/table/<table_id>/members
 @table_bp.route('/table/<int:table_id>/members', methods=['GET'])
 @jwt_required()
 def get_table_members(table_id):
@@ -73,7 +67,3 @@ def get_table_members(table_id):
 
     members = [{'id': u.id, 'username': u.username} for u in table.users]
     return jsonify(members)
-
-
-# 👇 ✅ export เพื่อให้ import จาก app.py ได้
-__all__ = ['table_bp']

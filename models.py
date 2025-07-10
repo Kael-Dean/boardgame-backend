@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-# ตารางกลาง (many-to-many) ระหว่าง User กับ GameTable
+# ✅ ตารางกลาง User <-> GameTable
 table_user = db.Table(
     'table_user',
     db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
@@ -17,7 +17,7 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     age = db.Column(db.Integer)
 
-    # ความสัมพันธ์กับโต๊ะ (many-to-many แต่ใช้เข้าได้โต๊ะเดียว)
+    # ✅ ความสัมพันธ์กับโต๊ะ
     tables = db.relationship('GameTable', secondary=table_user, backref='users')
 
 class GameTable(db.Model):
