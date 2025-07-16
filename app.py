@@ -16,7 +16,8 @@ CORS(app,
      methods=["GET", "POST", "OPTIONS"],
      allow_headers=["Content-Type", "Authorization"]
 )
-
+CORS(auth_bp, origins=["https://boardgame-app-inky.vercel.app"], supports_credentials=True)
+CORS(table_bp, origins=["https://boardgame-app-inky.vercel.app"], supports_credentials=True)
 # ✅ JWT & DB
 JWTManager(app)
 db.init_app(app)
